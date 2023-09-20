@@ -15,7 +15,18 @@
         android:layout_alignParentTop="true"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:title="チェックリスト" />
+        android:title="チェックリスト">
+
+        <ImageButton
+            android:id="@+id/editButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@android:drawable/ic_menu_edit"
+            android:contentDescription="編集"
+            android:background="@android:color/transparent"
+            android:layout_gravity="end"
+        />
+    </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
