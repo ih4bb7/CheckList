@@ -1,12 +1,15 @@
 package com.example.checklist
 
+import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import java.util.Collections
 
 class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, private val itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerAdapter.ViewHolderItem>() {
 
@@ -15,6 +18,12 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
             field = value
             notifyDataSetChanged() // フラグが変更されたらリスト全体を更新
         }
+
+    // アイテム移動の処理
+    fun onItemMove(fromPosition: Int, toPosition: Int) {
+        Collections.swap(checkListData, fromPosition, toPosition)
+        notifyItemMoved(fromPosition, toPosition)
+    }
 
     //５）ViewHolder（インナークラス）
     inner class ViewHolderItem(v:View,rAdapter:RecyclerAdapter) :RecyclerView.ViewHolder(v) {
@@ -38,11 +47,26 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
                     itemClickListener.onItemClick(itemView, position, checkListData[position].checkList)
                 }
             }
+
+            // deleteIconのクリック処理
+            deleteIcon.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    itemClickListener.onDeleteIconClick(itemView, position)
+                }
+            }
         }
     }
 
     interface OnItemClickListener {
         fun onItemClick(view: View, position: Int, clickedText: String)
+        fun onDeleteIconClick(view: View, position: Int)
+    }
+
+    // メソッドの追加
+    fun deleteItem(position: Int) {
+        checkListData.removeAt(position)
+        notifyItemRemoved(position)
     }
 
     private var selectedPosition: Int = RecyclerView.NO_POSITION
