@@ -1,18 +1,20 @@
 package com.example.checklist
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class ItemMoveCallback(private val adapter: RecyclerAdapter) : ItemTouchHelper.Callback() {
+class ItemMoveCallback_detail(private val adapter: RecyclerAdapter_detail) : ItemTouchHelper.Callback() {
 
     // ドラッグの許可
     override fun isLongPressDragEnabled(): Boolean {
@@ -69,38 +71,42 @@ class ItemMoveCallback(private val adapter: RecyclerAdapter) : ItemTouchHelper.C
     }
 }
 
-class MainActivity : AppCompatActivity() {
+class DetailActivity : AppCompatActivity() {
+
     // recyclerViewの変数を用意
     private lateinit var parentCheckList: ArrayList<CheckListData>
     private lateinit var recyclerView: RecyclerView
-    private lateinit var recyclerAdapter: RecyclerAdapter
+    private lateinit var recyclerAdapter: RecyclerAdapter_detail
     var editPosition : Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_detail)
+
+        // 渡されたテキストを取得
+        val intent = intent
+        val text = intent.getStringExtra("text")
+
+        // テキストを表示
+        val tvText: TextView = findViewById(R.id.tv)
+        tvText.text = text
 
         // recyclerView表示の呪文
-        recyclerView = findViewById(R.id.rv) //idの取得
+        recyclerView = findViewById(R.id.rv_sub) //idの取得
         parentCheckList = ArrayList()
-        val btnEdit : Button = findViewById(R.id.editBtn)
-        val et : EditText = findViewById(R.id.editText)
+        val btnEdit : Button = findViewById(R.id.editBtn_sub)
+        val et : EditText = findViewById(R.id.editText_sub)
 
         // recyclerAdapter を初期化
-        recyclerAdapter = RecyclerAdapter(parentCheckList, object : RecyclerAdapter.OnItemClickListener {
+        recyclerAdapter = RecyclerAdapter_detail(parentCheckList, object : RecyclerAdapter_detail.OnItemClickListener {
             override fun onItemClick(view: View, position: Int, clickedText: String) {
                 editPosition = position
                 val btnEditText = btnEdit.text
+//                val editText : EditText = findViewById(R.id.editText_sub)
                 if (btnEditText == "完了"){
                     et.text = SpannableStringBuilder(clickedText)
                     // カーソルを文字列の最後尾に移動
                     et.setSelection(et.text.length)
-                }
-                else{
-                    // 画面遷移の処理
-                    val intent = Intent(this@MainActivity, DetailActivity::class.java)
-                    intent.putExtra("text", clickedText)
-                    startActivity(intent)
                 }
             }
 
@@ -113,10 +119,10 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this) //各アイテムを縦に並べてください（見せ方の指示）
 
         // ItemTouchHelperを作成してRecyclerViewに関連付け
-        val itemTouchHelper = ItemTouchHelper(ItemMoveCallback(recyclerAdapter))
+        val itemTouchHelper = ItemTouchHelper(ItemMoveCallback_detail(recyclerAdapter))
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
-        val btnAdd : Button = findViewById(R.id.addBtn)
+        val btnAdd : Button = findViewById(R.id.addBtn_sub)
         btnAdd.setOnClickListener {
             val inputText = et.text.toString()
             if (inputText.isBlank()) return@setOnClickListener

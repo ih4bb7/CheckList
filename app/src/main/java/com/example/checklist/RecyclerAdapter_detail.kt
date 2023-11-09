@@ -11,7 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Collections
 
-class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, private val itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerAdapter.ViewHolderItem>() {
+class RecyclerAdapter_detail(private val checkListData: ArrayList<CheckListData>, private val itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerAdapter_detail.ViewHolderItem>() {
 
     var deleteIconVisible: Boolean = false
         set(value) {
@@ -25,12 +25,8 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
         notifyItemMoved(fromPosition, toPosition)
     }
 
-    fun getData(): ArrayList<CheckListData> {
-        return checkListData
-    }
-
     //５）ViewHolder（インナークラス）
-    inner class ViewHolderItem(v:View,rAdapter:RecyclerAdapter) :RecyclerView.ViewHolder(v) {
+    inner class ViewHolderItem(v:View,rAdapter:RecyclerAdapter_detail) :RecyclerView.ViewHolder(v) {
         val tvHolder : TextView = v.findViewById(R.id.tv)
         val deleteIcon: ImageView = v.findViewById(R.id.deleteIcon)
 
