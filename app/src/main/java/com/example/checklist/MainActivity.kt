@@ -11,8 +11,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
-class ItemMoveCallback(private val adapter: RecyclerAdapter) : ItemTouchHelper.Callback() {
+class ItemMoveCallback(private val activity: MainActivity, private val adapter: RecyclerAdapter) : ItemTouchHelper.Callback() {
 
     // ドラッグの許可
     override fun isLongPressDragEnabled(): Boolean {
@@ -39,6 +41,8 @@ class ItemMoveCallback(private val adapter: RecyclerAdapter) : ItemTouchHelper.C
         target: RecyclerView.ViewHolder
     ): Boolean {
         adapter.onItemMove(viewHolder.adapterPosition, target.adapterPosition)
+        // 行が移動したことを保存する
+        activity.saveDataToSharedPreferences(adapter.getData())
         return true
     }
 
@@ -112,8 +116,16 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = recyclerAdapter //アダプターをセット
         recyclerView.layoutManager = LinearLayoutManager(this) //各アイテムを縦に並べてください（見せ方の指示）
 
+        // データを取得する
+        val loadedDataList = loadDataFromSharedPreferences()
+
+        // ロードされたデータを使用してRecyclerViewを更新する
+        parentCheckList.clear()
+        parentCheckList.addAll(loadedDataList)
+        recyclerAdapter.notifyDataSetChanged()
+
         // ItemTouchHelperを作成してRecyclerViewに関連付け
-        val itemTouchHelper = ItemTouchHelper(ItemMoveCallback(recyclerAdapter))
+        val itemTouchHelper = ItemTouchHelper(ItemMoveCallback(this, recyclerAdapter))
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
         val btnAdd : Button = findViewById(R.id.addBtn)
@@ -126,11 +138,15 @@ class MainActivity : AppCompatActivity() {
                 parentCheckList[editPosition] = updatedData
                 recyclerAdapter.notifyItemChanged(editPosition)
                 editPosition = -1
+                // データを保存する
+                saveDataToSharedPreferences(parentCheckList)
             } else {
                 // 追加モードの場合、新しいデータをリストに追加
                 val data = CheckListData(inputText)
                 parentCheckList.add(data)
                 recyclerAdapter.notifyItemInserted(parentCheckList.lastIndex)
+                // データを保存する
+                saveDataToSharedPreferences(parentCheckList)
             }
 
             et.text = null
@@ -158,8 +174,35 @@ class MainActivity : AppCompatActivity() {
         builder.setPositiveButton("Yes") { _, _ ->
             recyclerAdapter.deleteItem(position)
             editPosition = -1
+            // データを保存する
+            saveDataToSharedPreferences(parentCheckList)
         }
         builder.setNegativeButton("No") { _, _ -> }
         builder.create().show()
+    }
+
+    // ArrayList<CheckListData>をSharedPreferencesに保存する関数
+    fun saveDataToSharedPreferences(dataList: ArrayList<CheckListData>) {
+        val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        // 保存するデータを文字列に変換
+        val dataListString = Gson().toJson(dataList)
+
+        // SharedPreferencesに保存
+        editor.putString("dataList", dataListString)
+        editor.apply()
+    }
+
+    // SharedPreferencesからArrayList<CheckListData>を取得する関数
+    fun loadDataFromSharedPreferences(): ArrayList<CheckListData> {
+        val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+
+        // SharedPreferencesからデータを取得
+        val dataListString = sharedPreferences.getString("dataList", "")
+
+        // 文字列をArrayList<CheckListData>に変換
+        val typeToken = object : TypeToken<ArrayList<CheckListData>>() {}.type
+        return Gson().fromJson(dataListString, typeToken) ?: ArrayList()
     }
 }
