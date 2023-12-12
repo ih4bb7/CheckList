@@ -75,7 +75,7 @@ class ItemMoveCallback(private val activity: MainActivity, private val adapter: 
 
 class MainActivity : AppCompatActivity() {
     // recyclerViewの変数を用意
-    private lateinit var parentCheckList: ArrayList<CheckListData>
+    private lateinit var parentCheckList: ArrayList<ParentListData>
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerAdapter: RecyclerAdapter
     var editPosition : Int = -1
@@ -104,6 +104,7 @@ class MainActivity : AppCompatActivity() {
                     // 画面遷移の処理
                     val intent = Intent(this@MainActivity, DetailActivity::class.java)
                     intent.putExtra("text", clickedText)
+                    intent.putExtra("id", parentCheckList[position].id)
                     startActivity(intent)
                 }
             }
@@ -134,7 +135,10 @@ class MainActivity : AppCompatActivity() {
             if (inputText.isBlank()) return@setOnClickListener
             if (btnEdit.text == "完了" && editPosition != -1) {
                 // 更新モードの場合、クリックされたアイテムを新しいテキストで更新
-                val updatedData = CheckListData(inputText)
+                val updatedData = ParentListData(
+                    parentCheckList[editPosition].id,
+                    inputText
+                )
                 parentCheckList[editPosition] = updatedData
                 recyclerAdapter.notifyItemChanged(editPosition)
                 editPosition = -1
@@ -142,7 +146,8 @@ class MainActivity : AppCompatActivity() {
                 saveDataToSharedPreferences(parentCheckList)
             } else {
                 // 追加モードの場合、新しいデータをリストに追加
-                val data = CheckListData(inputText)
+                val newId = generateUniqueId()
+                val data = ParentListData(newId, inputText)
                 parentCheckList.add(data)
                 recyclerAdapter.notifyItemInserted(parentCheckList.lastIndex)
                 // データを保存する
@@ -167,6 +172,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ユニークなIDを生成するメソッド
+    private fun generateUniqueId(): String {
+        return java.util.UUID.randomUUID().toString()
+    }
+
     // ダイアログ表示メソッドの追加
     private fun showDeleteDialog(position: Int) {
         val builder = AlertDialog.Builder(this)
@@ -181,8 +191,8 @@ class MainActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-    // ArrayList<CheckListData>をSharedPreferencesに保存する関数
-    fun saveDataToSharedPreferences(dataList: ArrayList<CheckListData>) {
+    // ArrayList<ParentListData>をSharedPreferencesに保存する関数
+    fun saveDataToSharedPreferences(dataList: ArrayList<ParentListData>) {
         val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
 
@@ -194,15 +204,15 @@ class MainActivity : AppCompatActivity() {
         editor.apply()
     }
 
-    // SharedPreferencesからArrayList<CheckListData>を取得する関数
-    fun loadDataFromSharedPreferences(): ArrayList<CheckListData> {
+    // SharedPreferencesからArrayList<ParentListData>を取得する関数
+    fun loadDataFromSharedPreferences(): ArrayList<ParentListData> {
         val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
 
         // SharedPreferencesからデータを取得
         val dataListString = sharedPreferences.getString("dataList", "")
 
-        // 文字列をArrayList<CheckListData>に変換
-        val typeToken = object : TypeToken<ArrayList<CheckListData>>() {}.type
+        // 文字列をArrayList<ParentListData>に変換
+        val typeToken = object : TypeToken<ArrayList<ParentListData>>() {}.type
         return Gson().fromJson(dataListString, typeToken) ?: ArrayList()
     }
 }

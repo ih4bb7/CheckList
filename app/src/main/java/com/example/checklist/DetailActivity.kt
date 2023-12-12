@@ -13,6 +13,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class ItemMoveCallback_detail(private val adapter: RecyclerAdapter_detail) : ItemTouchHelper.Callback() {
 
@@ -74,7 +76,7 @@ class ItemMoveCallback_detail(private val adapter: RecyclerAdapter_detail) : Ite
 class DetailActivity : AppCompatActivity() {
 
     // recyclerViewの変数を用意
-    private lateinit var parentCheckList: ArrayList<CheckListData>
+    private lateinit var childCheckList: ArrayList<ChildListData>
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerAdapter: RecyclerAdapter_detail
     var editPosition : Int = -1
@@ -86,6 +88,7 @@ class DetailActivity : AppCompatActivity() {
         // 渡されたテキストを取得
         val intent = intent
         val text = intent.getStringExtra("text")
+        val id = intent.getStringExtra("id")
 
         // テキストを表示
         val tvText: TextView = findViewById(R.id.tv)
@@ -93,16 +96,16 @@ class DetailActivity : AppCompatActivity() {
 
         // recyclerView表示の呪文
         recyclerView = findViewById(R.id.rv_sub) //idの取得
-        parentCheckList = ArrayList()
+//        childCheckList = ArrayList()
+        childCheckList = loadDataFromSharedPreferences(id.toString()) // IDごとのデータを取得
         val btnEdit : Button = findViewById(R.id.editBtn_sub)
         val et : EditText = findViewById(R.id.editText_sub)
 
         // recyclerAdapter を初期化
-        recyclerAdapter = RecyclerAdapter_detail(parentCheckList, object : RecyclerAdapter_detail.OnItemClickListener {
+        recyclerAdapter = RecyclerAdapter_detail(childCheckList, object : RecyclerAdapter_detail.OnItemClickListener {
             override fun onItemClick(view: View, position: Int, clickedText: String) {
                 editPosition = position
                 val btnEditText = btnEdit.text
-//                val editText : EditText = findViewById(R.id.editText_sub)
                 if (btnEditText == "完了"){
                     et.text = SpannableStringBuilder(clickedText)
                     // カーソルを文字列の最後尾に移動
@@ -128,16 +131,19 @@ class DetailActivity : AppCompatActivity() {
             if (inputText.isBlank()) return@setOnClickListener
             if (btnEdit.text == "完了" && editPosition != -1) {
                 // 更新モードの場合、クリックされたアイテムを新しいテキストで更新
-                val updatedData = CheckListData(inputText)
-                parentCheckList[editPosition] = updatedData
+                val updatedData = ChildListData(id.toString(), inputText)
+                childCheckList[editPosition] = updatedData
                 recyclerAdapter.notifyItemChanged(editPosition)
                 editPosition = -1
             } else {
                 // 追加モードの場合、新しいデータをリストに追加
-                val data = CheckListData(inputText)
-                parentCheckList.add(data)
-                recyclerAdapter.notifyItemInserted(parentCheckList.lastIndex)
+                val data = ChildListData(id.toString(), inputText)
+                childCheckList.add(data)
+                recyclerAdapter.notifyItemInserted(childCheckList.lastIndex)
             }
+
+            // IDごとのデータを保存
+            saveDataToSharedPreferences(childCheckList, id.toString())
 
             et.text = null
         }
@@ -155,6 +161,31 @@ class DetailActivity : AppCompatActivity() {
                 recyclerAdapter.deleteIconVisible = false // deleteIconを非表示
             }
         }
+    }
+
+    // IDごとのデータをSharedPreferencesに保存する関数
+    fun saveDataToSharedPreferences(dataList: ArrayList<ChildListData>, id: String) {
+        val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        // 保存するデータを文字列に変換
+        val dataListString = Gson().toJson(dataList)
+
+        // SharedPreferencesに保存（IDごとに保存）
+        editor.putString("childList_$id", dataListString)
+        editor.apply()
+    }
+
+    // IDごとのデータをSharedPreferencesから取得する関数
+    fun loadDataFromSharedPreferences(id: String): ArrayList<ChildListData> {
+        val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+
+        // SharedPreferencesからデータを取得
+        val dataListString = sharedPreferences.getString("childList_$id", "")
+
+        // 文字列をArrayList<ChildListData>に変換
+        val typeToken = object : TypeToken<ArrayList<ChildListData>>() {}.type
+        return Gson().fromJson(dataListString, typeToken) ?: ArrayList()
     }
 
     // ダイアログ表示メソッドの追加

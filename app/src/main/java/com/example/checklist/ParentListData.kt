@@ -1,5 +1,6 @@
 package com.example.checklist
 
-data class CheckListData(
+data class ParentListData(
+    val id: String,
     val checkList :String
 )

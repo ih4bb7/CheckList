@@ -11,7 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Collections
 
-class RecyclerAdapter_detail(private val checkListData: ArrayList<CheckListData>, private val itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerAdapter_detail.ViewHolderItem>() {
+class RecyclerAdapter_detail(private val checkListData: ArrayList<ChildListData>, private val itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerAdapter_detail.ViewHolderItem>() {
 
     var deleteIconVisible: Boolean = false
         set(value) {
@@ -30,7 +30,7 @@ class RecyclerAdapter_detail(private val checkListData: ArrayList<CheckListData>
         val tvHolder : TextView = v.findViewById(R.id.tv)
         val deleteIcon: ImageView = v.findViewById(R.id.deleteIcon)
 
-        fun bind(data: CheckListData) {
+        fun bind(data: ChildListData) {
             // 他のバインド処理
             if (deleteIconVisible) {
                 deleteIcon.visibility = View.VISIBLE
@@ -44,7 +44,7 @@ class RecyclerAdapter_detail(private val checkListData: ArrayList<CheckListData>
             v.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    itemClickListener.onItemClick(itemView, position, checkListData[position].checkList)
+                    itemClickListener.onItemClick(itemView, position, checkListData[position].listData)
                 }
             }
 
@@ -82,18 +82,18 @@ class RecyclerAdapter_detail(private val checkListData: ArrayList<CheckListData>
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderItem {
         val itemXml = LayoutInflater.from(parent.context)
-            .inflate(R.layout.one_layout, parent, false)
+            .inflate(R.layout.one_layout_detail, parent, false)
         return ViewHolderItem(itemXml, this)
     }
 
     override fun onBindViewHolder(holder: ViewHolderItem, position: Int) {
         val currentItem = checkListData[position] //何番目のリスト（アイテム）ですか
         holder.bind(currentItem) // bindメソッドを呼び出してアイテムをバインド
-        holder.tvHolder.text = currentItem.checkList //そのリストの中の要素を指定して代入
+        holder.tvHolder.text = currentItem.listData //そのリストの中の要素を指定して代入
 
         // クリックイベントをリスナーに登録
         holder.itemView.setOnClickListener {
-            itemClickListener.onItemClick(holder.itemView, position, currentItem.checkList)
+            itemClickListener.onItemClick(holder.itemView, position, currentItem.listData)
         }
     }
 

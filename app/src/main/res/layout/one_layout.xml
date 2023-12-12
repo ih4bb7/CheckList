@@ -23,7 +23,6 @@
         android:background="?android:attr/listDivider"
         app:layout_constraintBottom_toBottomOf="@+id/tv" />
 
-    <!-- ゴミ箱マークのImageView -->
     <ImageView
         android:id="@+id/deleteIcon"
         android:layout_width="wrap_content"

@@ -40,8 +40,6 @@
                 android:layout_toStartOf="@+id/addBtn_sub"
                 android:hint="テキストを入力"
                 android:inputType="text|textNoSuggestions|textFilter"/>
-
-
         </RelativeLayout>
 
 

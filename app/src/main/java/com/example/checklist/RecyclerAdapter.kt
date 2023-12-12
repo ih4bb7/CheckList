@@ -11,7 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Collections
 
-class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, private val itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerAdapter.ViewHolderItem>() {
+class RecyclerAdapter(private val parentListData: ArrayList<ParentListData>, private val itemClickListener: OnItemClickListener) : RecyclerView.Adapter<RecyclerAdapter.ViewHolderItem>() {
 
     var deleteIconVisible: Boolean = false
         set(value) {
@@ -21,12 +21,12 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
 
     // アイテム移動の処理
     fun onItemMove(fromPosition: Int, toPosition: Int) {
-        Collections.swap(checkListData, fromPosition, toPosition)
+        Collections.swap(parentListData, fromPosition, toPosition)
         notifyItemMoved(fromPosition, toPosition)
     }
 
-    fun getData(): ArrayList<CheckListData> {
-        return checkListData
+    fun getData(): ArrayList<ParentListData> {
+        return parentListData
     }
 
     //５）ViewHolder（インナークラス）
@@ -34,7 +34,7 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
         val tvHolder : TextView = v.findViewById(R.id.tv)
         val deleteIcon: ImageView = v.findViewById(R.id.deleteIcon)
 
-        fun bind(data: CheckListData) {
+        fun bind(data: ParentListData) {
             // 他のバインド処理
             if (deleteIconVisible) {
                 deleteIcon.visibility = View.VISIBLE
@@ -48,7 +48,7 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
             v.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    itemClickListener.onItemClick(itemView, position, checkListData[position].checkList)
+                    itemClickListener.onItemClick(itemView, position, parentListData[position].checkList)
                 }
             }
 
@@ -69,7 +69,7 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
 
     // メソッドの追加
     fun deleteItem(position: Int) {
-        checkListData.removeAt(position)
+        parentListData.removeAt(position)
         notifyItemRemoved(position)
     }
 
@@ -91,7 +91,7 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
     }
 
     override fun onBindViewHolder(holder: ViewHolderItem, position: Int) {
-        val currentItem = checkListData[position] //何番目のリスト（アイテム）ですか
+        val currentItem = parentListData[position] //何番目のリスト（アイテム）ですか
         holder.bind(currentItem) // bindメソッドを呼び出してアイテムをバインド
         holder.tvHolder.text = currentItem.checkList //そのリストの中の要素を指定して代入
 
@@ -101,5 +101,5 @@ class RecyclerAdapter(private val checkListData: ArrayList<CheckListData>, priva
         }
     }
 
-    override fun getItemCount(): Int = checkListData.size
+    override fun getItemCount(): Int = parentListData.size
 }
